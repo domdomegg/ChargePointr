@@ -1,0 +1,11 @@
+{
+  "name": "chargePointr",
+  "description": "Points you to the nearest EV charging point",
+  "private": true,
+  "dependencies": {
+    "actions-on-google": "latest",
+    "firebase-admin": "latest",
+    "firebase-functions": "latest",
+    "dashbot": "latest"
+  }
+}
