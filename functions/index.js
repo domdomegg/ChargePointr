@@ -10,7 +10,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 
     function askLocationPermission (app) {
 		app.setContext('Nearestchargers-followup');
-        app.askForPermission("To find the nearest chargers",
+        app.askForPermission('To find the nearest chargers',
         	app.SupportedPermissions.DEVICE_PRECISE_LOCATION);
     }
 
@@ -19,8 +19,13 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 
         if (app.isPermissionGranted()) {
             let coordinates = app.getDeviceLocation().coordinates;
+			let MAX_RESULTS = '10';
 
-			let url = 'https://api.openchargemap.io/v2/poi/?output=json&maxresults=10&distance=true&usagetypeid=1,4,7,5&verbose=false&statustypeid=10,50,75&latitude=' + coordinates.latitude + '&longitude=' + coordinates.longitude;// + '&levelid=' + chargerLevels.join();
+			if (!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+				MAX_RESULTS = '4';
+			}
+
+			let url = 'https://api.openchargemap.io/v2/poi/?output=json&distance=true&usagetypeid=1,4,7,5&verbose=false&statustypeid=10,50,75&latitude=' + coordinates.latitude + '&longitude=' + coordinates.longitude + '&maxresults=' + MAX_RESULTS;// + '&levelid=' + chargerLevels.join();
 
             getJSON(url, function (data) {
                 let options = [];
@@ -39,7 +44,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 					}
                 });
 
-                let speech = 'Which of these chargers looks good?';
+                let speech = 'Which of these chargers sounds good?';
                 let title = 'Nearby chargers';
 
 				if (!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
@@ -61,10 +66,23 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 
 		getJSON(url, function (data) {
 			let charger = data[0];
-			let speech = "Here are the details for that charger: ";
+
+			let speech = 'Here are the details for that charger. Do you want directions or attributions data for it?';
+			if (!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+				speech = '<speak>That charger is ' + charger.StatusType.Title + ', and has ';
+				speech += (charger.Connections[0].Quantity ? charger.Connections[0].Quantity + ' ' : 'a '); // 1
+				speech += (charger.Connections[0].Level ? charger.Connections[0].Level.Title + ' ' : ''); // Level 2 : Medium (Over 2kW)
+				speech += (charger.Connections[0].ConnectionType ? charger.Connections[0].ConnectionType.Title + ' ' : ''); // Mennekes (Type 2)
+				speech += (charger.Connections[0].CurrentType ? charger.Connections[0].CurrentType.Title + ' ' : ''); // AC (Single-Phase)
+				speech += (charger.Connections[0].Quantity > 1 ? 'connections. ' : 'connection. ');
+				speech += 'It\'s located at ' + charger.AddressInfo.AddressLine1 + (charger.AddressInfo.Postcode ? ', <say-as interpret-as="digits">' + charger.AddressInfo.Postcode : '') + '</say-as>.';
+				speech += 'Do you want to exit or get attributions info for it?</speak>';
+			}
+
 			let title = charger.AddressInfo.Title;
 			let destinationName = 'View on Open Charge Map';
 			let suggestionUrl = 'https://openchargemap.org/site/poi/details/' + app.getSelectedOption();
+
 			let text = '';
 
 			text += (charger.StatusType.Title ? '**Status:** ' + charger.StatusType.Title + '  \n' : '');
@@ -88,19 +106,23 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			text += (charger.DataProvider ? '**Source:** ' + charger.DataProvider.Title : '');
 
 			app.setContext('charger', 3, charger);
-			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, ['Get directions', 'Attributions', 'Search again', 'Thanks, bye']);
+			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, ['Directions', 'Attributions', 'Search again', 'Nah, bye']);
 		});
     }
 
 	function getDirections (app) {
 		let charger = (app.getContext('charger') ? app.getContext('charger').parameters : {});
-		if(charger.AddressInfo) {
-			let suggestionUrl = 'https://maps.google.com?saddr=Current+Location&daddr=' + charger.AddressInfo.Latitude.toString() + ',' + charger.AddressInfo.Longitude.toString();
+		if(!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+			if(charger.AddressInfo) {
+				let suggestionUrl = 'https://maps.google.com?saddr=Current+Location&daddr=' + charger.AddressInfo.Latitude.toString() + ',' + charger.AddressInfo.Longitude.toString();
 
-			app.setContext('charger', 3, charger);
-			askWithLinkAndSuggestions('Sure, here\'s directions on Google Maps', 'Google Maps', suggestionUrl, ['Search again', 'Exit']);
+				app.setContext('charger', 3, charger);
+				askWithLinkAndSuggestions('Sure, open the link for directions on Google Maps. Alternatively, what else would you like to do?', 'Google Maps', suggestionUrl, ['Search again', 'Exit']);
+			} else {
+				askSimpleResponseWithSuggestions('Sorry, you need to search for chargers first. Should I do that now?', ['Yeah', 'No thanks, bye']);
+			}
 		} else {
-			askSimpleResponseWithSuggestions('Sorry, you need to search for chargers first', ['Find chargers', 'Exit']);
+			askSimpleResponse('Unfortunately directions aren\'t supported on your device. What else would you like to do?');
 		}
 	}
 
@@ -112,14 +134,14 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			if(charger.DataProvider) {
 				let destinationName = charger.DataProvider.Title;
 				let suggestionUrl = charger.DataProvider.WebsiteURL;
-				let speech = 'Data by ' + charger.DataProvider.Title + ', ' + charger.DataProvider.License;
+				let speech = 'Data by ' + charger.DataProvider.Title + ', ' + charger.DataProvider.License + '. What else can I help you with?';
 
-				askWithLinkAndSuggestions(speech, destinationName, suggestionUrl, ['Find other chargers', 'Get directions', 'Thanks, bye']);
+				askWithLinkAndSuggestions(speech, destinationName, suggestionUrl, ['Find other chargers', 'Get directions', 'Nothing, bye']);
 			} else {
-				askSimpleResponseWithSuggestions('Data provider information is missing for that charger.', ['Find other chargers', 'Thanks, bye']);
+				askSimpleResponseWithSuggestions('Data provider information is missing for that charger. Do you want to search again?', ['Find other chargers', 'Thanks, bye']);
 			}
 		} else {
-			askSimpleResponseWithSuggestions('Sorry, you need to search for chargers first', ['Find chargers', 'Exit']);
+			askSimpleResponseWithSuggestions('Sorry, you need to search for chargers first. Do you want me to do that now?', ['Yes', 'No, exit']);
 		}
 	}
 
@@ -132,6 +154,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 	app.handleRequest(actionMap);
 
 	function askSimpleResponseWithSuggestions(speech, suggestions) {
+		dashbot.logIncoming(app.getRawInput());
 		dashbot.logOutgoing(app.getRawInput(), speech);
 
         if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
@@ -145,6 +168,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
 	function askWithLinkAndSuggestions(speech, destinationName, suggestionUrl, suggestions) {
+		dashbot.logIncoming(app.getRawInput());
 		dashbot.logOutgoing(app.getRawInput(), speech);
 
         if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
@@ -159,6 +183,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
     function askWithList(speech, title, options) {
+		dashbot.logIncoming(app.getRawInput());
 		dashbot.logOutgoing(app.getRawInput(), speech);
 
         let optionItems = [];
@@ -170,6 +195,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
 	function askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, suggestions) {
+		dashbot.logIncoming(app.getRawInput());
 		dashbot.logOutgoing(app.getRawInput(), speech);
 
 		app.ask(app.buildRichResponse()
