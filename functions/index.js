@@ -33,11 +33,11 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
                 let options = [];
 
                 data.forEach(function (charger) {
-					if(charger.AddressInfo && charger.Connections[0]) {
+					if(charger.AddressInfo && charger.Connections.last()) {
 						options.push({
 							title: charger.AddressInfo.Title,
-							description: charger.Connections[0].Level.Title + ', '
-										+ (charger.Connections[0].CurrentType ? charger.Connections[0].CurrentType.Title + ', '  : '')
+							description: charger.Connections.last().Level.Title + ', '
+										+ (charger.Connections.last().CurrentType ? charger.Connections.last().CurrentType.Title + ', '  : '')
 										+ (charger.UsageType.Title.substr(9) ? charger.UsageType.Title.substr(9) + ', ' : '')
 										+ charger.AddressInfo.Distance.toString().substr(0, 3) + 'mi',
 							selectionKey: charger.ID.toString(),
@@ -72,11 +72,11 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			let speech = 'Here are the details for that charger. Do you want directions or attributions data for it?';
 			if (!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
 				speech = '<speak>That charger is ' + charger.StatusType.Title + ', and has ';
-				speech += (charger.Connections[0].Quantity ? charger.Connections[0].Quantity + ' ' : 'a '); // 1
-				speech += (charger.Connections[0].Level ? charger.Connections[0].Level.Title + ' ' : ''); // Level 2 : Medium (Over 2kW)
-				speech += (charger.Connections[0].ConnectionType ? charger.Connections[0].ConnectionType.Title + ' ' : ''); // Mennekes (Type 2)
-				speech += (charger.Connections[0].CurrentType ? charger.Connections[0].CurrentType.Title + ' ' : ''); // AC (Single-Phase)
-				speech += (charger.Connections[0].Quantity > 1 ? 'connections. ' : 'connection. ');
+				speech += (charger.Connections.last().Quantity ? charger.Connections.last().Quantity + ' ' : 'a '); // 1
+				speech += (charger.Connections.last().Level ? charger.Connections.last().Level.Title + ' ' : ''); // Level 2 : Medium (Over 2kW)
+				speech += (charger.Connections.last().ConnectionType ? charger.Connections.last().ConnectionType.Title + ' ' : ''); // Mennekes (Type 2)
+				speech += (charger.Connections.last().CurrentType ? charger.Connections.last().CurrentType.Title + ' ' : ''); // AC (Single-Phase)
+				speech += (charger.Connections.last().Quantity > 1 ? 'connections. ' : 'connection. ');
 				speech += 'It\'s located at ' + charger.AddressInfo.AddressLine1 + (charger.AddressInfo.Postcode ? ', <say-as interpret-as="digits">' + charger.AddressInfo.Postcode : '') + '</say-as>.';
 				speech += 'Do you want to exit or get attributions info for it?</speak>';
 			}
@@ -216,3 +216,7 @@ function getJSON(url, callback) {
 function randomFromArray(arr) {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
+
+Array.prototype.last = function() {
+    return this[this.length - 1];
+};
