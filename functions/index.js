@@ -7,6 +7,7 @@ const dashbot = require('dashbot')('fC1GphoDWue8172wjcpSEFv1MXF4h7aemj3hxGBn').g
 
 exports.chargePointr = functions.https.onRequest((request, response) => {
 	const app = new ApiAiApp({request: request, response: response});
+	dashbot.configHandler(app);
 
     function askLocationPermission (app) {
 		app.setContext('Nearestchargers-followup');
@@ -155,9 +156,6 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 	app.handleRequest(actionMap);
 
 	function askSimpleResponseWithSuggestions(speech, suggestions) {
-		dashbot.logIncoming(app.getRawInput());
-		dashbot.logOutgoing(app.getRawInput(), speech);
-
         if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
             app.ask(app.buildRichResponse()
                 .addSimpleResponse(speech)
@@ -169,10 +167,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
 	function askWithLinkAndSuggestions(speech, destinationName, suggestionUrl, suggestions) {
-		dashbot.logIncoming(app.getRawInput());
-		dashbot.logOutgoing(app.getRawInput(), speech);
-
-        if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+		if (app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
             app.ask(app.buildRichResponse()
                 .addSimpleResponse(speech)
                 .addSuggestionLink(destinationName, suggestionUrl)
@@ -184,10 +179,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
     function askWithList(speech, title, options) {
-		dashbot.logIncoming(app.getRawInput());
-		dashbot.logOutgoing(app.getRawInput(), speech);
-
-        let optionItems = [];
+		let optionItems = [];
         options.forEach(function (option) {
             optionItems.push(app.buildOptionItem(option.selectionKey, option.synonyms).setTitle(option.title).setDescription(option.description));
         });
@@ -196,9 +188,6 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
     }
 
 	function askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, suggestions) {
-		dashbot.logIncoming(app.getRawInput());
-		dashbot.logOutgoing(app.getRawInput(), speech);
-
 		app.ask(app.buildRichResponse()
 			.addSimpleResponse(speech)
 			.addBasicCard(app.buildBasicCard(text)
