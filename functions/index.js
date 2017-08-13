@@ -108,7 +108,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			text += (charger.DataProvider ? '**Source:** ' + charger.DataProvider.Title : '');
 
 			app.setContext('charger', 3, charger);
-			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, ['Directions', 'Attributions', 'Search again', 'Nah, bye']);
+			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, ['Directions', 'Attributions', 'Search again', 'No thanks, bye']);
 		});
     }
 
