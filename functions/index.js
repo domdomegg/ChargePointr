@@ -10,12 +10,13 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 
     function askLocationPermission (app) {
 		app.setContext('Nearestchargers-followup');
-        app.askForPermission('To find the nearest chargers',
-        	app.SupportedPermissions.DEVICE_PRECISE_LOCATION);
+		app.setContext('charger-levels', 1, {levels: app.getArgument('chargerLevels')});
+
+        app.askForPermission('To find the nearest chargers', app.SupportedPermissions.DEVICE_PRECISE_LOCATION);
     }
 
     function findChargersWithLocation (app) {
-		// let chargerLevels = ['1', '2', '3'];
+		let chargerLevels = (app.getContext('charger-levels') ? app.getContext('charger-levels').parameters.levels : ['1', '2', '3']);
 
         if (app.isPermissionGranted()) {
             let coordinates = app.getDeviceLocation().coordinates;
@@ -25,7 +26,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 				MAX_RESULTS = '4';
 			}
 
-			let url = 'https://api.openchargemap.io/v2/poi/?output=json&distance=true&usagetypeid=1,4,7,5&verbose=false&statustypeid=10,50,75&latitude=' + coordinates.latitude + '&longitude=' + coordinates.longitude + '&maxresults=' + MAX_RESULTS;// + '&levelid=' + chargerLevels.join();
+			let url = 'https://api.openchargemap.io/v2/poi/?output=json&distance=true&usagetypeid=1,4,7,5&verbose=false&statustypeid=10,50,75&latitude=' + coordinates.latitude + '&longitude=' + coordinates.longitude + '&maxresults=' + MAX_RESULTS + '&levelid=' + chargerLevels.join();
 
             getJSON(url, function (data) {
                 let options = [];
