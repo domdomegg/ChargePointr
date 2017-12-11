@@ -122,7 +122,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 
 	function getDirections (app) {
 		let charger = (app.getContext('charger') ? app.getContext('charger').parameters : {});
-		if(!app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
+		if(app.hasSurfaceCapability(app.SurfaceCapabilities.SCREEN_OUTPUT)) {
 			if(charger.AddressInfo) {
 				let suggestionUrl = 'https://maps.google.com?saddr=Current+Location&daddr=' + charger.AddressInfo.Latitude.toString() + ',' + charger.AddressInfo.Longitude.toString();
 
