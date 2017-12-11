@@ -6,6 +6,7 @@
     "actions-on-google": "latest",
     "firebase-admin": "latest",
     "firebase-functions": "latest",
-    "dashbot": "latest"
+    "dashbot": "latest",
+    "i18n": "latest"
   }
 }
