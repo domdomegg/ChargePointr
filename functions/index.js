@@ -106,7 +106,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			text += '**' + i18n.__('CONNECTIONS') + ':**  \n';
 			charger.Connections.forEach(function (connection) {
 				text += (connection.Quantity ? connection.Quantity + 'x ' : '1x '); // 1
-				text += (connection.Level ? connection.Level.Title + ' ' : ''); // Level 2 : Medium (Over 2kW)
+				text += (connection.Level ? getLevelTitle(connection.LevelID) + ' ' : ''); // Level 2 : Medium (Over 2kW)
 				text += (connection.ConnectionType ? connection.ConnectionType.Title + ' ' : ''); // Mennekes (Type 2)
 				text += (connection.CurrentType ? connection.CurrentType.Title : ''); // AC (Single-Phase)
 				text += '  \n';
@@ -116,7 +116,7 @@ exports.chargePointr = functions.https.onRequest((request, response) => {
 			text += (charger.DataProvider ? '**' + i18n.__('SOURCE') + ':** ' + charger.DataProvider.Title : '');
 
 			app.setContext('charger', 3, charger);
-			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, [i18n.__('DIRECTIONS'), i18n.__('SOURCE'), i18n.__('SEARCH_AGAIN'), i18n.__('EXIT')]);
+			askWithBasicCardAndLinkAndSuggestions(speech, title, text, destinationName, suggestionUrl, [i18n.__('DIRECTIONS'), i18n.__('ATTRIBUTIONS'), i18n.__('SEARCH_AGAIN'), i18n.__('EXIT')]);
 		});
     }
 
@@ -225,7 +225,7 @@ function getMaxLevelTitle(connections) {
 	let maxLevel = 1;
 
 	for (var i = 0; i < connections.length; i++) {
-		maxLevel = Math.max(maxLevel, connections.LevelID);
+		maxLevel = Math.max(maxLevel, connections[i].LevelID);
 	}
 
 	return getLevelTitle(maxLevel);
