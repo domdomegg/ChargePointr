@@ -1,6 +1,6 @@
 'use strict'
 
-const ApiAiApp = require('actions-on-google').ApiAiApp;
+const DialogflowApp = require('actions-on-google').DialogflowApp;
 const functions = require('firebase-functions');
 const https = require('https');
 const dashbot = require('dashbot')('fC1GphoDWue8172wjcpSEFv1MXF4h7aemj3hxGBn').google;
@@ -13,7 +13,7 @@ i18n.configure({
 });
 
 exports.chargePointr = functions.https.onRequest((request, response) => {
-	const app = new ApiAiApp({request: request, response: response});
+	const app = new DialogflowApp({request: request, response: response});
 	dashbot.configHandler(app);
 	i18n.setLocale(app.getUserLocale());
 
