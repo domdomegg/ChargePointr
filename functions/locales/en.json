@@ -1,8 +1,8 @@
 {
    "PERMISSION_REASON": "To find the nearest chargers",
    "PERMISSION_FAILED": "Unfortunately I can't find charge points near you without your location. Do you want to try again?",
-   "LEVEL_1": "Level 1 : Low (Under 2kW)",
-   "LEVEL_2": "Level 2 : Medium (Over 2kW)",
+   "LEVEL_1": "Level 1: Low (Under 2kW)",
+   "LEVEL_2": "Level 2: Medium (Over 2kW)",
    "LEVEL_3": "Level 3: High (Over 40kW)",
    "WHICH_CHARGER": "Which of these chargers sounds good?",
    "NEARBY_CHARGERS": "Nearby chargers",

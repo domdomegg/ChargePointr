@@ -7,7 +7,7 @@ const dashbot = require('dashbot')('fC1GphoDWue8172wjcpSEFv1MXF4h7aemj3hxGBn').g
 const i18n = require('i18n');
 
 i18n.configure({
-  locales: ['en'],
+  locales: ['en', 'fr'],
   directory: __dirname + '/locales',
   defaultLocale: 'en'
 });
