@@ -15,7 +15,7 @@ i18n.configure({
 exports.chargePointr = functions.https.onRequest((request, response) => {
 	const app = new DialogflowApp({request: request, response: response});
 	dashbot.configHandler(app);
-	i18n.setLocale(app.getUserLocale());
+	i18n.setLocale(app.getUserLocale().substring(0,2));
 
     function askLocationPermission (app) {
 		app.setContext('Nearestchargers-followup');
