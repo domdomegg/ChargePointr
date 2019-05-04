@@ -3,7 +3,6 @@
 const DialogflowApp = require('actions-on-google').DialogflowApp;
 const functions = require('firebase-functions');
 const https = require('https');
-const dashbot = require('dashbot')('fC1GphoDWue8172wjcpSEFv1MXF4h7aemj3hxGBn').google;
 const i18n = require('i18n');
 
 i18n.configure({
@@ -14,7 +13,6 @@ i18n.configure({
 
 exports.chargePointr = functions.https.onRequest((request, response) => {
 	const app = new DialogflowApp({request: request, response: response});
-	dashbot.configHandler(app);
 	i18n.setLocale(app.getUserLocale().substring(0,2));
 
     function askLocationPermission (app) {
